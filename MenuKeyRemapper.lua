@@ -2,7 +2,6 @@ local cls = "                                            \r"
 local lual = "\r\27[9C]\27[94m[INFO/LuaScript]\27[m "
 local lual_s = ": \27[92mInitialized successfully\27[m                           "
 local title, windowcheck = nil, false
-local TinkerPath = FileMgr.GetMenuRootPath()
 
 local NewKey = {
 	{512,   "Tab"},
@@ -130,7 +129,7 @@ local NewControllerBind = {
 
 menu.set_menu_icon("\xef\x84\x9c")
 local opensesame = menu.get_submenu("HotKey Remapper"):add_category("Toggle Menu")
-	
+
 local hotkey1 = commandmgr.add_list_command("setnewkey", "New Hotkey", "Select a Hotkey to toggle YimMenuV2.", NewKey, 527, nil)
 local hotkey2 = commandmgr.add_list_command("setnewkey2", "New Hotkey 2", "Select a second Hotkey to toggle YimMenuV2.", NewKey, 516, nil)
 local Button1 = commandmgr.add_list_command("setnewcont", "New Controller Bind", "Select a Controller Button to toggle YimMenuV2.", NewControllerBind, 638, nil)
@@ -139,7 +138,7 @@ local Button2 = commandmgr.add_list_command("setnewcont2", "New Controller Bind 
 commandmgr.add_bool_command("keycombo", "Key Combo", "Enables Key Combo.", false, function() end)
 commandmgr.add_bool_command("conttogglecombo", "Controller Combo", "Enables Controller Combo.", false, function() end)
 
-commandmgr.add_looped_command("keyremap", "Hotkey Remap", "Simulates [INSERT] key and [Ctrl+\\]", function() 
+commandmgr.add_looped_command("keyremap", "Hotkey Remap", "Simulates [INSERT] key and [Ctrl+\\]", function()
 	if commandmgr.get_command("keycombo"):get_value() then
 		if (ImGui.IsKeyDown(hotkey1:get_value()) and ImGui.IsKeyReleased(hotkey2:get_value())) or (ImGui.IsKeyReleased(hotkey1:get_value()) and ImGui.IsKeyDown(hotkey2:get_value())) then
 			menu.toggle()
@@ -153,7 +152,7 @@ end)
 
 commandmgr.get_command("keyremap"):set_value(true)
 
-commandmgr.add_looped_command("conttoggle", "Controller", "Enables Controller support.", function() 
+commandmgr.add_looped_command("conttoggle", "Controller", "Enables Controller support.", function()
 	if commandmgr.get_command("conttogglecombo"):get_value() then
 		if (ImGui.IsKeyDown(Button1:get_value()) and ImGui.IsKeyReleased(Button2:get_value())) or (ImGui.IsKeyReleased(Button1:get_value()) and ImGui.IsKeyDown(Button2:get_value())) then
 			menu.toggle()
@@ -165,8 +164,8 @@ commandmgr.add_looped_command("conttoggle", "Controller", "Enables Controller su
 	end
 end)
 
-if FileMgr.DoesFileExist(TinkerPath.."/MenuKeyRemapper/config.lua") and FileMgr.ReadFileContent(TinkerPath.."/MenuKeyRemapper/config.lua") ~= "" then
-	require("config")
+if FileMgr.DoesFileExist("MenuKeyRemapper/includes/config.lua") and FileMgr.ReadFileContent("MenuKeyRemapper/includes/config.lua") ~= "" then
+	require("MenuKeyRemapper.includes.config")
 	commandmgr.get_command("setnewkey"):set_value(Hotkeys.setnewkey)
 	commandmgr.get_command("setnewkey2"):set_value(Hotkeys.setnewkey2)
 	commandmgr.get_command("setnewcont"):set_value(Hotkeys.setnewcont)
@@ -179,11 +178,11 @@ end
 
 log.info(cls.."                                "..cls..[[
 
- ____ ____ ____ ____ ____ ____ 
+ ____ ____ ____ ____ ____ ____
 ||H |||o |||t |||k |||e |||y ||
 ||__|||__|||__|||__|||__|||__||
 |/__\|/__\|/__\|/__\|/__\|/__\|
- ____ ____ ____ ____ ____ ____ ____ ____ 
+ ____ ____ ____ ____ ____ ____ ____ ____
 ||R |||e |||m |||a |||p |||p |||e |||r ||
 ||__|||__|||__|||__|||__|||__|||__|||__||
 |/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|]]..cls.."\n")
@@ -195,52 +194,53 @@ opensesame:imgui(function()
 		title = util.time()
 		windowcheck = true
 	elseif windowcheck then
-		if util.time() < title + 5000 then 
-			ImGui.SetCursorPosX((ImGui.GetWindowWidth() - ImGui.CalcTextSize("Original Tinker-Script by ImagineNothing")) / 2)
+		if util.time() < title + 5000 then
+			ImGui.SetCursorPosX((ImGui.GetWindowWidth() - ImGui.CalcTextSize("Original TinkerScript by ImagineNothing")) / 2)
 			ImGui.TextDisabled("Original TinkerScript by ImagineNothing") ImGui.Separator()
 		end
 	end
 
 	commandmgr.get_command("keyremap"):draw()
-	
+
 	if commandmgr.get_command("keyremap"):get_value() then
 		ImGui.SameLine() commandmgr.get_command("keycombo"):draw()
 		commandmgr.get_command("setnewkey"):draw()
 	end
-	
+
 	if commandmgr.get_command("keyremap"):get_value() and commandmgr.get_command("keycombo"):get_value() then
 		commandmgr.get_command("setnewkey2"):draw()
 	end
-	
+
 	ImGui.Spacing()
 	ImGui.Separator()
 	ImGui.Spacing()
-	
+
 	commandmgr.get_command("conttoggle"):draw()
-	
+
 	if commandmgr.get_command("conttoggle"):get_value() then
 		ImGui.SameLine() commandmgr.get_command("conttogglecombo"):draw()
 		commandmgr.get_command("setnewcont"):draw()
 	end
-	
+
 	if commandmgr.get_command("conttoggle"):get_value() and commandmgr.get_command("conttogglecombo"):get_value() then
 		commandmgr.get_command("setnewcont2"):draw()
 	end
-	
+
 	ImGui.Spacing()
 	ImGui.Separator()
 	ImGui.Spacing()
-	
+
 	if ImGui.Button("Save Settings") then
-		FileMgr.WriteFileContent(TinkerPath.."/MenuKeyRemapper/config.lua", "Hotkeys = {}\n", false)
+		if not FileMgr.DoesFileExist("MenuKeyRemapper/includes") then FileMgr.CreateDir("MenuKeyRemapper/includes") end
+		FileMgr.WriteFileContent("MenuKeyRemapper/includes/config.lua", "Hotkeys = {}\n", false)
 		for _, cmd in ipairs({"setnewkey", "setnewkey2", "setnewcont", "setnewcont2", "keycombo", "conttogglecombo", "keyremap", "conttoggle"}) do
-			FileMgr.WriteFileContent(TinkerPath.."/MenuKeyRemapper/config.lua", "Hotkeys."..cmd.." = "..tostring(commandmgr.get_command(cmd):get_value()).."\n", true)
+			FileMgr.WriteFileContent("MenuKeyRemapper/includes/config.lua", "Hotkeys."..cmd.." = "..tostring(commandmgr.get_command(cmd):get_value()).."\n", true)
 		end
 	end
-	
+
 	ImGui.SameLine()
-	
+
 	if ImGui.Button("Delete Settings") then
-		FileMgr.DeleteFile(TinkerPath.."/MenuKeyRemapper/config.lua")
+		FileMgr.DeleteFile("MenuKeyRemapper/includes/config.lua")
 	end
 end)
